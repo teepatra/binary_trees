@@ -1,56 +1,75 @@
 #include "binary_trees.h"
 
 /**
- * binary_tree_levelorder - traverst a binary tree using level-order traverse
- * @tree: tree to traverse
- * @func: pointer to a function to call for each node
+ * push - pushs a node in the front of a queue
+ * @head: a pointer to the head of the queue
+ * @tail: a pointer to the tail of the queue
+ * @node: a pointer to the binary tree node
+ *
+ * Return: void
  */
-void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
+void push(queue_t **head, queue_t **tail, const binary_tree_t *node)
 {
-	size_t level, maxlevel;
+	queue_t *new_node;
 
-	if (!tree || !func)
+	new_node = malloc(sizeof(queue_t));
+	if (!new_node)
 		return;
-
-	maxlevel = binary_tree_height(tree) + 1;
-
-	for (level = 1; level <= maxlevel; level++)
-		btlo_helper(tree, func, level);
-}
-
-/**
- * btlo_helper - goes through a binary tree using post-order traverse
- * @tree: tree to traverse
- * @func: pointer to a function to call for each node
- * @level: the level of the tree to call func upon
- */
-void btlo_helper(const binary_tree_t *tree, void (*func)(int), size_t level)
-{
-	if (level == 1)
-		func(tree->n);
+	new_node->node = node;
+	if (*head == NULL)
+	{
+		(*head) = new_node;
+		(*tail) = new_node;
+		new_node->next = NULL;
+		new_node->prev = NULL;
+	}
 	else
 	{
-		btlo_helper(tree->left, func, level - 1);
-		btlo_helper(tree->right, func, level - 1);
+		new_node->next = (*head);
+		new_node->prev = NULL;
+		(*head)->prev = new_node;
+		(*head) = new_node;
 	}
 }
 
 /**
- * binary_tree_height - measures the height of a binary tree
- * @tree: tree to measure the height of
+ * pop - pops a node from the tail of the queue
+ * @tail: a pointer to the tail of the queue
  *
- * Return: height of the tree
- *         0 if tree is NULL
+ * Return: void
  */
-size_t binary_tree_height(const binary_tree_t *tree)
+void pop(queue_t **tail)
 {
-	size_t height_l = 0;
-	size_t height_r = 0;
+	queue_t *tmp;
+
+	tmp = (*tail);
+	(*tail) = (*tail)->prev;
+	free(tmp);
+}
+
+/**
+ * binary_tree_levelorder - Level-order traversal
+ * @tree: a pointer to the root node
+ * @func: a pointer to a function
+ *
+ * Return: void
+ */
+void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
+{
+	queue_t *head = NULL, *tail = NULL;
+	const binary_tree_t *current;
 
 	if (!tree)
-		return (0);
-
-	height_l = tree->left ? 1 + binary_tree_height(tree->left) : 0;
-	height_r = tree->right ? 1 + binary_tree_height(tree->right) : 0;
-	return (height_l > height_r ? height_l : height_r);
+		return;
+	push(&head, &tail, tree);
+	while (tail)
+	{
+		current = tail->node;
+		if (current->left)
+			push(&head, &tail, current->left);
+		if (current->right)
+			push(&head, &tail, current->right);
+		func(tail->node->n);
+		pop(&tail);
+	}
 }
