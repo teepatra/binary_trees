@@ -10,72 +10,31 @@
  */
 int binary_tree_is_perfect(const binary_tree_t *tree)
 {
-	size_t height = 0;
-	size_t nodes = 0;
-	size_t power = 0;
+	int depth;
+	int level = 0;
 
+	depth = find_depth(tree);
+	return (is_perfect(tree, depth, level));
+}
+int find_depth(const binary_tree_t *tree)
+{
+	int depth = 0;
+
+	while (!tree)
+	{
+		depth++;
+		tree = tree->left;
+	}
+	return (depth);
+}
+int is_perfect(const binary_tree_t *tree, int depth, int level)
+{
 	if (!tree)
-		return (0);
-
-	if (!tree->right && !tree->left)
 		return (1);
-
-	height = binary_tree_height(tree);
-	nodes = binary_tree_size(tree);
-
-	power = (size_t)_pow_recursion(2, height + 1);
-	return (power - 1 == nodes);
-}
-
-/**
- *_pow_recursion - returns the value of x raised to the power of y
- *@x: the value to exponentiate
- *@y: the power to raise x to
- *Return: x to the power of y, or -1 if y is negative
- */
-
-int _pow_recursion(int x, int y)
-{
-	if (y < 0)
-		return (-1);
-	if (y == 0)
-		return (1);
-	else
-		return (x * _pow_recursion(x, y - 1));
-
-}
-
-/**
- * binary_tree_size - measures the size of a binary tree
- * @tree: tree to measure the size of
- *
- * Return: size of the tree
- *         0 if tree is NULL
- */
-size_t binary_tree_size(const binary_tree_t *tree)
-{
-	if (!tree)
+	if (tree->left == NULL && tree->right == NULL)
+		return (depth == level);
+	if (tree->left == NULL || tree->right == NULL)
 		return (0);
-
-	return (binary_tree_size(tree->left) + binary_tree_size(tree->right) + 1);
-}
-
-/**
- * binary_tree_height - measures the height of a binary tree
- * @tree: tree to measure the height of
- *
- * Return: height of the tree
- *         0 if tree is NULL
- */
-size_t binary_tree_height(const binary_tree_t *tree)
-{
-	size_t height_l = 0;
-	size_t height_r = 0;
-
-	if (!tree)
-		return (0);
-
-	height_l = tree->left ? 1 + binary_tree_height(tree->left) : 0;
-	height_r = tree->right ? 1 + binary_tree_height(tree->right) : 0;
-	return (height_l > height_r ? height_l : height_r);
+	return (is_perfect(tree->left, depth, level + 1) &&
+		is_perfect(tree->right, depth, level + 1));
 }
